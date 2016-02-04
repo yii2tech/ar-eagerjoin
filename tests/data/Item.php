@@ -3,6 +3,7 @@
 namespace yii2tech\tests\unit\ar\eagerjoin\data;
 
 use yii\db\ActiveRecord;
+use yii2tech\ar\eagerjoin\EagerJoinBehavior;
 
 /**
  * @property integer $id
@@ -20,8 +21,9 @@ class Item extends ActiveRecord
     public function behaviors()
     {
         return [
-            '' => [
-                //'class' => Behavior::className(),
+            'eagerJoin' => [
+                'class' => EagerJoinBehavior::className(),
+                'relation' => 'group',
             ],
         ];
     }
