@@ -11,21 +11,41 @@ class EagerJoinBehaviorTest extends TestCase
     public function testEagerJoin()
     {
         $item = Item::find()
-            ->select(['{{item}}.*', '{{group}}.code'])
+            ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
             ->joinWith('group', false)
+            ->andWhere(['groupId' => 2])
+            ->limit(1)
             ->one();
 
         $this->assertTrue($item->isRelationPopulated('group'));
         $this->assertTrue($item->group instanceof Group);
-        $this->assertNotEmpty($item->group->code);
+        $this->assertEquals('group2', $item->group->name);
+        $this->assertEquals('g2', $item->group->code);
+        $this->assertEquals($item->groupId, $item->group->id);
     }
 
     public function testSkipEagerJoin()
     {
         $item = Item::find()
             ->select(['{{item}}.*', new Expression('1 AS foo')])
+            ->andWhere(['{{item}}.[[id]]' => 2])
+            ->limit(1)
             ->one();
 
         $this->assertFalse($item->isRelationPopulated('group'));
+    }
+
+    public function testAttributeMap()
+    {
+        $item = Item::find()
+            ->select(['{{item}}.*', '{{group}}.[[name]] AS groupName'])
+            ->joinWith('group', false)
+            ->andWhere(['groupId' => 2])
+            ->limit(1)
+            ->one();
+
+        $this->assertTrue($item->isRelationPopulated('group'));
+        $this->assertTrue($item->group instanceof Group);
+        $this->assertEquals('group2', $item->group->name);
     }
 }

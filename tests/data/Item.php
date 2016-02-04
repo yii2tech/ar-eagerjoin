@@ -23,7 +23,9 @@ class Item extends ActiveRecord
         return [
             'eagerJoin' => [
                 'class' => EagerJoinBehavior::className(),
-                'relation' => 'group',
+                'attributeMap' => [
+                    'groupName' => ['group', 'name'],
+                ],
             ],
         ];
     }

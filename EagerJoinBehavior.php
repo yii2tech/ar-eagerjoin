@@ -22,59 +22,81 @@ use yii\db\ActiveRecord;
 class EagerJoinBehavior extends Behavior
 {
     /**
-     * @var string name of the 'has one' relation, which should be eager joined.
+     * @var string boundary, which should be used to separate relation name from attribute name
+     * in selected column name.
      */
-    public $relation;
+    public $boundary = '__';
     /**
-     * @var array
+     * @var array[] map for the virtual properties, which should trigger related model population,
+     * in format: selectedName => [relationName, attributeName]
+     * For example:
+     *
+     * ```php
+     * [
+     *     'owner' => ['user', 'name'],
+     *     'email' => ['user', 'email'],
+     *     'groupTag' => ['group', 'tag'],
+     * ]
+     * ```
      */
     public $attributeMap = [];
-    /**
-     * @var string
-     */
-    public $attributePrefix;
 
     /**
-     * @var array
+     * @var array related model attribute names cache.
      */
-    private static $relatedAttributeNames = [];
+    private static $relatedAttributes = [];
+
 
     /**
+     * @param string $relationName name of the relation to be ensured.
      * @return ActiveRecord related model instance
      */
-    protected function ensureRelated()
+    protected function ensureRelated($relationName)
     {
-        if ($this->owner->isRelationPopulated($this->relation)) {
-            return $this->owner->{$this->relation};
+        if ($this->owner->isRelationPopulated($relationName)) {
+            return $this->owner->{$relationName};
         }
 
-        $relation = $this->owner->getRelation($this->relation);
+        $relation = $this->owner->getRelation($relationName);
         $modelClass = $relation->modelClass;
         $model = new $modelClass();
-        $this->owner->populateRelation($this->relation, $model);
+        foreach ($relation->link as $relationAttribute => $ownerAttribute) {
+            $model->{$relationAttribute} = $this->owner->{$ownerAttribute};
+        }
+
+        $this->owner->populateRelation($relationName, $model);
         return $model;
     }
 
     /**
+     * @param string $relationName name of the relation to be searched.
      * @return array related model attribute names.
      */
-    protected function getRelatedAttributeNames()
+    protected function getRelatedAttributes($relationName)
     {
-        $key = get_class($this->owner) . '::' . $this->relation;
-        if (!isset(self::$relatedAttributeNames[$key])) {
-            self::$relatedAttributeNames[$key] = $this->findRelatedAttributeNames();
+        $key = get_class($this->owner) . '::' . $relationName;
+        if (!isset(self::$relatedAttributes[$key])) {
+            self::$relatedAttributes[$key] = $this->findRelatedAttributes($relationName);
         }
-        return self::$relatedAttributeNames[$key];
+        return self::$relatedAttributes[$key];
     }
 
     /**
+     * @param string $relationName name of the relation to be searched.
      * @return array related model attribute names.
      */
-    protected function findRelatedAttributeNames()
+    protected function findRelatedAttributes($relationName)
     {
         /* @var $model ActiveRecord */
-        $relation = $this->owner->getRelation($this->relation);
+        $relation = $this->owner->getRelation($relationName);
         $modelClass = $relation->modelClass;
+
+        $getTableSchemaCallback = [$modelClass, 'getTableSchema'];
+        if (is_callable($getTableSchemaCallback, false)) {
+            $tableSchema = call_user_func($getTableSchemaCallback);
+            return array_keys($tableSchema->columns);
+        }
+
         $model = new $modelClass();
         return $model->attributes();
     }
@@ -89,16 +111,17 @@ class EagerJoinBehavior extends Behavior
         if (isset($this->attributeMap[$name])) {
             return true;
         }
+        if (strpos($name, $this->boundary) === false) {
+            return false;
+        }
+        list($relation, $attribute) = explode($this->boundary, $name, 2);
 
-        $relatedAttributes = $this->getRelatedAttributeNames();
-        if (in_array($name, $relatedAttributes, true)) {
+        $relatedAttributes = $this->getRelatedAttributes($relation);
+        if (in_array($attribute, $relatedAttributes, true)) {
             return true;
         }
 
-        if ($this->attributePrefix === null) {
-            return false;
-        }
-        return strncmp($this->attributePrefix, $name, strlen($this->attributePrefix)) === 0;
+        return false;
     }
 
     /**
@@ -109,18 +132,15 @@ class EagerJoinBehavior extends Behavior
     protected function setRelatedAttribute($name, $value)
     {
         if (isset($this->attributeMap[$name])) {
-            $attribute = $this->attributeMap[$name];
-        } elseif ($this->attributePrefix !== null && strncmp($this->attributePrefix, $name, strlen($this->attributePrefix)) === 0) {
-            $attribute = substr($name, strlen($this->attributePrefix));
+            list($relation, $attribute) = $this->attributeMap[$name];
         } else {
-            $relatedAttributes = $this->getRelatedAttributeNames();
-            if (in_array($name, $relatedAttributes, true)) {
-                $attribute = $name;
-            } else {
+            if (strpos($name, $this->boundary) === false) {
                 return false;
             }
+            list($relation, $attribute) = explode($this->boundary, $name, 2);
         }
-        $model = $this->ensureRelated();
+
+        $model = $this->ensureRelated($relation);
         $model->{$attribute} = $value;
         return true;
     }
