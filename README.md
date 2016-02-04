@@ -33,4 +33,43 @@ to the require section of your composer.json.
 Usage
 -----
 
-This extension provides 
+This extension provides support for ActiveRecord relation eager loading via join without extra query.
+
+Configuration example:
+
+```php
+use yii\db\ActiveRecord;
+use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+
+class Item extends ActiveRecord
+{
+    public function behaviors()
+    {
+        return [
+            'eagerJoin' => [
+                'class' => EagerJoinBehavior::className(),
+            ],
+        ];
+    }
+
+    public function getGroup()
+    {
+        return $this->hasOne(Group::className(), ['id' => 'groupId']);
+    }
+}
+```
+
+Usage example:
+
+```php
+$items = Item::find()
+    ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+    ->joinWith('group', false) // no regular eager loading!!!
+    ->all();
+
+foreach ($items as $item) {
+    var_dump($item->isRelationPopulated('group')); // outputs `true`!!!
+    echo $item->group->name; // outputs group name
+    echo $item->group->code; // outputs group code
+}
+```

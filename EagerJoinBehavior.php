@@ -12,7 +12,48 @@ use yii\base\UnknownPropertyException;
 use yii\db\ActiveRecord;
 
 /**
- * EagerJoinBehavior
+ * EagerJoinBehavior provides support for ActiveRecord relation eager loading via join without extra query.
+ *
+ * Configuration example:
+ *
+ * ```php
+ * use yii\db\ActiveRecord;
+ * use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+ *
+ * class Item extends ActiveRecord
+ * {
+ *     public function behaviors()
+ *     {
+ *         return [
+ *             'eagerJoin' => [
+ *                 'class' => EagerJoinBehavior::className(),
+ *             ],
+ *         ];
+ *     }
+ *
+ *     public function getGroup()
+ *     {
+ *         return $this->hasOne(Group::className(), ['id' => 'groupId']);
+ *     }
+ *
+ *     // ...
+ * }
+ * ```
+ *
+ * Usage example:
+ *
+ * ```php
+ * $items = Item::find()
+ *     ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+ *     ->joinWith('group', false) // no regular eager loading!!!
+ *     ->all();
+ *
+ * foreach ($items as $item) {
+ *     var_dump($item->isRelationPopulated('group')); // outputs `true`!!!
+ *     echo $item->group->name; // outputs group name
+ *     echo $item->group->code; // outputs group code
+ * }
+ * ```
  *
  * @property ActiveRecord $owner
  *
@@ -22,8 +63,10 @@ use yii\db\ActiveRecord;
 class EagerJoinBehavior extends Behavior
 {
     /**
-     * @var string boundary, which should be used to separate relation name from attribute name
-     * in selected column name.
+     * @var string boundary, which should be used to separate relation name from attribute name in selected column name.
+     * Each field, mentioned in query 'select' statement, for the joined entity should be composed in format:
+     * `relationName + boundary + attributeName`.
+     * For example: 'group__name' will refer to the 'name' attribute of the relation 'group'.
      */
     public $boundary = '__';
     /**
