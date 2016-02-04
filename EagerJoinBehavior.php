@@ -25,7 +25,19 @@ class EagerJoinBehavior extends Behavior
      * @var string name of the 'has one' relation, which should be eager joined.
      */
     public $relation;
+    /**
+     * @var array
+     */
+    public $attributeMap = [];
+    /**
+     * @var string
+     */
+    public $attributePrefix;
 
+    /**
+     * @var array
+     */
+    private static $relatedAttributeNames = [];
 
     /**
      * @return ActiveRecord related model instance
@@ -43,6 +55,75 @@ class EagerJoinBehavior extends Behavior
         return $model;
     }
 
+    /**
+     * @return array related model attribute names.
+     */
+    protected function getRelatedAttributeNames()
+    {
+        $key = get_class($this->owner) . '::' . $this->relation;
+        if (!isset(self::$relatedAttributeNames[$key])) {
+            self::$relatedAttributeNames[$key] = $this->findRelatedAttributeNames();
+        }
+        return self::$relatedAttributeNames[$key];
+    }
+
+    /**
+     * @return array related model attribute names.
+     */
+    protected function findRelatedAttributeNames()
+    {
+        /* @var $model ActiveRecord */
+        $relation = $this->owner->getRelation($this->relation);
+        $modelClass = $relation->modelClass;
+        $model = new $modelClass();
+        return $model->attributes();
+    }
+
+    /**
+     * Checks if related model attribute can be set.
+     * @param string $name attribute name
+     * @return boolean whether related model attribute exists or not.
+     */
+    protected function hasRelatedAttribute($name)
+    {
+        if (isset($this->attributeMap[$name])) {
+            return true;
+        }
+
+        $relatedAttributes = $this->getRelatedAttributeNames();
+        if (in_array($name, $relatedAttributes, true)) {
+            return true;
+        }
+
+        if ($this->attributePrefix === null) {
+            return false;
+        }
+        return strncmp($this->attributePrefix, $name, strlen($this->attributePrefix)) === 0;
+    }
+
+    /**
+     * @param string $name attribute name.
+     * @param mixed $value attribute value.
+     * @return boolean whether related model attribute has been set or not.
+     */
+    protected function setRelatedAttribute($name, $value)
+    {
+        if (isset($this->attributeMap[$name])) {
+            $attribute = $this->attributeMap[$name];
+        } elseif ($this->attributePrefix !== null && strncmp($this->attributePrefix, $name, strlen($this->attributePrefix)) === 0) {
+            $attribute = substr($name, strlen($this->attributePrefix));
+        } else {
+            $relatedAttributes = $this->getRelatedAttributeNames();
+            if (in_array($name, $relatedAttributes, true)) {
+                $attribute = $name;
+            } else {
+                return false;
+            }
+        }
+        $model = $this->ensureRelated();
+        $model->{$attribute} = $value;
+        return true;
+    }
 
     // Property Access Extension:
 
@@ -59,9 +140,7 @@ class EagerJoinBehavior extends Behavior
             parent::__set($name, $value);
         } catch (UnknownPropertyException $exception) {
             if ($this->owner !== null) {
-                $model = $this->ensureRelated();
-                if ($model->hasAttribute($name)) {
-                    $model->{$name} = $value;
+                if ($this->setRelatedAttribute($name, $value)) {
                     return;
                 }
             }
@@ -80,7 +159,6 @@ class EagerJoinBehavior extends Behavior
         if ($this->owner == null) {
             return false;
         }
-        $model = $this->ensureRelated();
-        return $model->hasAttribute($name);
+        return $this->hasRelatedAttribute($name);
     }
 }
