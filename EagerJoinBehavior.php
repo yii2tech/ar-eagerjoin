@@ -27,6 +27,7 @@ use yii\db\ActiveRecord;
  *         return [
  *             'eagerJoin' => [
  *                 'class' => EagerJoinBehavior::className(),
+ *                 'boundary' => '__',
  *             ],
  *         ];
  *     }
