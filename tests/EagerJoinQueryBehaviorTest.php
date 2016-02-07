@@ -13,7 +13,7 @@ class EagerJoinQueryBehaviorTest extends TestCase
         $this->assertNotEmpty($query->select);
         $this->assertNotEmpty($query->joinWith);
 
-        $item = $query->andWhere(['{{Item}}.id' => 1])->one();
+        $item = $query->andWhere(['{{Item}}.[[name]]' => 'item1'])->one();
 
         $this->assertTrue($item->isRelationPopulated('group'));
         $this->assertEquals('item1', $item->name);

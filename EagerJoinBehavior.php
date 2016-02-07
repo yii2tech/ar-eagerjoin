@@ -86,23 +86,18 @@ class EagerJoinBehavior extends RelatedAttributesBehavior
 
 
     /**
-     * @param string $relationName name of the relation to be ensured.
-     * @return ActiveRecord related model instance
+     * Creates an instance of the ActiveRecord related via particular relation.
+     * @param string $relationName name of the relation to be instantiated.
+     * @return ActiveRecord related model instance.
      */
-    protected function ensureRelated($relationName)
+    protected function instantiateRelated($relationName)
     {
-        if ($this->owner->isRelationPopulated($relationName)) {
-            return $this->owner->{$relationName};
-        }
-
         $relation = $this->owner->getRelation($relationName);
         $modelClass = $relation->modelClass;
         $model = new $modelClass();
         foreach ($relation->link as $relationAttribute => $ownerAttribute) {
             $model->{$relationAttribute} = $this->owner->{$ownerAttribute};
         }
-
-        $this->owner->populateRelation($relationName, $model);
         return $model;
     }
 
@@ -130,6 +125,7 @@ class EagerJoinBehavior extends RelatedAttributesBehavior
     }
 
     /**
+     * Sets the related model attribute, populating relation in process.
      * @param string $name attribute name.
      * @param mixed $value attribute value.
      * @return boolean whether related model attribute has been set or not.
@@ -137,16 +133,34 @@ class EagerJoinBehavior extends RelatedAttributesBehavior
     protected function setRelatedAttribute($name, $value)
     {
         if (isset($this->attributeMap[$name])) {
-            list($relation, $attribute) = $this->attributeMap[$name];
+            list($relationName, $attribute) = $this->attributeMap[$name];
         } else {
             if (strpos($name, $this->boundary) === false) {
                 return false;
             }
-            list($relation, $attribute) = explode($this->boundary, $name, 2);
+            list($relationName, $attribute) = explode($this->boundary, $name, 2);
         }
 
-        $model = $this->ensureRelated($relation);
+        if ($value === null) {
+            if ($this->owner->isRelationPopulated($relationName)) {
+                if ($this->owner->{$relationName} === null) {
+                    return true;
+                }
+            } else {
+                $this->owner->populateRelation($relationName, null);
+                return true;
+            }
+        }
+
+        if ($this->owner->isRelationPopulated($relationName) && $this->owner->{$relationName} !== null) {
+            $model = $this->owner->{$relationName};
+        } else {
+            $model = $this->instantiateRelated($relationName);
+            $this->owner->populateRelation($relationName, $model);
+        }
+
         $model->{$attribute} = $value;
+
         return true;
     }
 

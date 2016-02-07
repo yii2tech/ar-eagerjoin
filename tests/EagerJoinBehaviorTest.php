@@ -35,6 +35,9 @@ class EagerJoinBehaviorTest extends TestCase
         $this->assertFalse($item->isRelationPopulated('group'));
     }
 
+    /**
+     * @depends testEagerJoin
+     */
     public function testAttributeMap()
     {
         $item = Item::find()
@@ -47,5 +50,21 @@ class EagerJoinBehaviorTest extends TestCase
         $this->assertTrue($item->isRelationPopulated('group'));
         $this->assertTrue($item->group instanceof Group);
         $this->assertEquals('group2', $item->group->name);
+    }
+
+    /**
+     * @depends testEagerJoin
+     */
+    public function testRelatedIsNull()
+    {
+        $item = Item::find()
+            ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+            ->joinWith('group', false)
+            ->andWhere(['groupId' => null])
+            ->limit(1)
+            ->one();
+
+        $this->assertTrue($item->isRelationPopulated('group'));
+        $this->assertNull($item->group);
     }
 }

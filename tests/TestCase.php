@@ -98,6 +98,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             [2, 'item2', 12],
             [1, 'item3', 14],
             [2, 'item4', 16],
+            [null, 'item5', 20],
         ])->execute();
     }
 }
