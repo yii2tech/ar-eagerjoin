@@ -22,6 +22,7 @@ class EagerJoinBehaviorTest extends TestCase
         $this->assertEquals('group2', $item->group->name);
         $this->assertEquals('g2', $item->group->code);
         $this->assertEquals($item->groupId, $item->group->id);
+        $this->assertFalse($item->group->isNewRecord);
     }
 
     public function testSkipEagerJoin()

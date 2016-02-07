@@ -162,6 +162,7 @@ class EagerJoinBehavior extends RelatedAttributesBehavior
         }
 
         $model->{$attribute} = $value;
+        $model->setOldAttributes($model->getAttributes([$attribute]));
 
         return true;
     }
