@@ -95,8 +95,10 @@ class EagerJoinBehavior extends RelatedAttributesBehavior
         $relation = $this->owner->getRelation($relationName);
         $modelClass = $relation->modelClass;
         $model = new $modelClass();
-        foreach ($relation->link as $relationAttribute => $ownerAttribute) {
-            $model->{$relationAttribute} = $this->owner->{$ownerAttribute};
+        if ($relation->via === null) {
+            foreach ($relation->link as $relationAttribute => $ownerAttribute) {
+                $model->{$relationAttribute} = $this->owner->{$ownerAttribute};
+            }
         }
         return $model;
     }
