@@ -138,3 +138,8 @@ method, otherwise you'll gain no benefit.
 
 > Tip: if you use 'camelCase' notation for your table columns, you may use single underscore ('_') as a
   boundary to make select statements more clear.
+
+
+## Restrictions and drawbacks <span id="internationalization"></span>
+
+Only 'has-one' relations are supported. Extension is unable to handle 'has-many' relations.

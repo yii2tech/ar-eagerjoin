@@ -7,7 +7,6 @@
 
 namespace yii2tech\ar\eagerjoin;
 
-use yii\base\Behavior;
 use yii\base\UnknownPropertyException;
 use yii\db\ActiveRecord;
 
@@ -61,7 +60,7 @@ use yii\db\ActiveRecord;
  * @author Paul Klimov <klimov.paul@gmail.com>
  * @since 1.0
  */
-class EagerJoinBehavior extends Behavior
+class EagerJoinBehavior extends RelatedAttributesBehavior
 {
     /**
      * @var string boundary, which should be used to separate relation name from attribute name in selected column name.
@@ -84,11 +83,6 @@ class EagerJoinBehavior extends Behavior
      * ```
      */
     public $attributeMap = [];
-
-    /**
-     * @var array related model attribute names cache.
-     */
-    private static $relatedAttributes = [];
 
 
     /**
@@ -113,39 +107,6 @@ class EagerJoinBehavior extends Behavior
     }
 
     /**
-     * @param string $relationName name of the relation to be searched.
-     * @return array related model attribute names.
-     */
-    protected function getRelatedAttributes($relationName)
-    {
-        $key = get_class($this->owner) . '::' . $relationName;
-        if (!isset(self::$relatedAttributes[$key])) {
-            self::$relatedAttributes[$key] = $this->findRelatedAttributes($relationName);
-        }
-        return self::$relatedAttributes[$key];
-    }
-
-    /**
-     * @param string $relationName name of the relation to be searched.
-     * @return array related model attribute names.
-     */
-    protected function findRelatedAttributes($relationName)
-    {
-        /* @var $model ActiveRecord */
-        $relation = $this->owner->getRelation($relationName);
-        $modelClass = $relation->modelClass;
-
-        $getTableSchemaCallback = [$modelClass, 'getTableSchema'];
-        if (is_callable($getTableSchemaCallback, false)) {
-            $tableSchema = call_user_func($getTableSchemaCallback);
-            return array_keys($tableSchema->columns);
-        }
-
-        $model = new $modelClass();
-        return $model->attributes();
-    }
-
-    /**
      * Checks if related model attribute can be set.
      * @param string $name attribute name
      * @return boolean whether related model attribute exists or not.
@@ -160,7 +121,7 @@ class EagerJoinBehavior extends Behavior
         }
         list($relation, $attribute) = explode($this->boundary, $name, 2);
 
-        $relatedAttributes = $this->getRelatedAttributes($relation);
+        $relatedAttributes = $this->getRelatedAttributes($this->owner, $relation);
         if (in_array($attribute, $relatedAttributes, true)) {
             return true;
         }

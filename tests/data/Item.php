@@ -4,6 +4,7 @@ namespace yii2tech\tests\unit\ar\eagerjoin\data;
 
 use yii\db\ActiveRecord;
 use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
 
 /**
  * @property integer $id
@@ -46,6 +47,15 @@ class Item extends ActiveRecord
         return [
             [['groupId', 'name', 'price'], 'required'],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     * @return ItemQuery|EagerJoinQueryBehavior the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new ItemQuery(get_called_class());
     }
 
     /**
