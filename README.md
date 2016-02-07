@@ -1,7 +1,7 @@
 ActiveRecord Eager Join Extension for Yii 2
 ===========================================
 
-This extension provides support for ActiveRecord relation eager loading via join without extra query.
+This extension provides support for ActiveRecord relation eager loading via 'join' without extra query.
 
 For license information check the [LICENSE](LICENSE.md)-file.
 
@@ -33,7 +33,7 @@ to the require section of your composer.json.
 Usage
 -----
 
-This extension provides support for ActiveRecord relation eager loading via join without extra query.
+This extension provides support for ActiveRecord relation eager loading via 'join' without extra query.
 Imagine we have the following database structure:
 
 ```sql
@@ -56,8 +56,8 @@ CREATE TABLE `Item`
 ) ENGINE InnoDB;
 ```
 
-If you need to display listing of items with the groups they belong to ordered by group name or code,
-you'll have to `JOIN` SQL statement and thus - `\yii\db\ActiveQuery::joinWith()` method:
+If you need to display listing of items, with the groups they belong to, ordered by group name or code,
+you'll have to use `JOIN` SQL statement and thus - `\yii\db\ActiveQuery::joinWith()` method:
 
 ```php
 $items = Item::find()
@@ -66,12 +66,12 @@ $items = Item::find()
     ->all();
 ```
 
-However the code above will perform 2 SQL queries: one - for the item fetching (including `JOIN` and
+However, the code above will perform 2 SQL queries: one - for the item fetching (including `JOIN` and
 `ORDER BY` statements) and second - for the group fetching. While second query will be very simple and fast,
 it is still redundant and unefficient, since all group columns may be selected along with the item ones.
 
-This extension provides [[yii2tech\ar\eagerjoin\EagerJoinBehavior]] behavior, which once attached to the
-ActiveRecord class allows selecting related records without extra SQL query.
+This extension provides [[yii2tech\ar\eagerjoin\EagerJoinBehavior]] behavior, which, once attached to the
+ActiveRecord class, allows selecting related records without extra SQL query.
 
 Configuration example:
 
@@ -137,7 +137,7 @@ method, otherwise you'll gain no benefit.
   are not meant to be passed to the related records. Thus double underscore ('__') is used as default.
 
 > Tip: if you use 'camelCase' notation for your table columns, you may use single underscore ('_') as a
-  boundary to make select statements more clear.
+  boundary in order to make select statements more clear.
 
 You may speed up composition of the query for the eager join using [[\yii2tech\ar\eagerjoin\EagerJoinQueryBehavior]] behavior.
 This behavior should be attached to the [[\yii\db\ActiveQuery]] instance:
@@ -180,7 +180,7 @@ class Item extends ActiveRecord
 }
 ```
 
-Then you''ll be able to use `eagerJoinWith()` method while building a query:
+Then you'll be able to use `eagerJoinWith()` method while building a query:
 
 ```php
 $items = Item::find()->eagerJoinWith('group')->all();
