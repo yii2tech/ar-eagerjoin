@@ -139,7 +139,60 @@ method, otherwise you'll gain no benefit.
 > Tip: if you use 'camelCase' notation for your table columns, you may use single underscore ('_') as a
   boundary to make select statements more clear.
 
+You may speed up composition of the query for the eager join using [[\yii2tech\ar\eagerjoin\EagerJoinQueryBehavior]] behavior.
+This behavior should be attached to the [[\yii\db\ActiveQuery]] instance:
+
+```php
+use yii\db\ActiveQuery;
+use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
+use yii\db\ActiveRecord;
+use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+
+class ItemQuery extends ActiveQuery
+{
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            'eagerJoin' => [
+                'class' => EagerJoinQueryBehavior::className(),
+            ],
+        ];
+    }
+
+    // ...
+}
+
+class Item extends ActiveRecord
+{
+    /**
+     * @inheritdoc
+     * @return ItemQuery|EagerJoinQueryBehavior the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new ItemQuery(get_called_class());
+    }
+
+    // ...
+}
+```
+
+Then you''ll be able to use `eagerJoinWith()` method while building a query:
+
+```php
+$items = Item::find()->eagerJoinWith('group')->all();
+```
+
+Composition of the proper 'select' and 'join' statements will be performed automatically.
+
 
 ## Restrictions and drawbacks <span id="internationalization"></span>
 
-Only 'has-one' relations are supported. Extension is unable to handle 'has-many' relations.
+While reducing the number of executed queries, this extension has several restrictions and drawbacks.
+
+1) Only 'has-one' relations are supported. Extension is unable to handle 'has-many' relations.
+
+2) If all selected related model fields will be `null` the whole related record will be set to `null`.
