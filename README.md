@@ -70,26 +70,18 @@ However, the code above will perform 2 SQL queries: one - for the item fetching 
 `ORDER BY` statements) and second - for the group fetching. While second query will be very simple and fast,
 it is still redundant and unefficient, since all group columns may be selected along with the item ones.
 
-This extension provides [[yii2tech\ar\eagerjoin\EagerJoinBehavior]] behavior, which, once attached to the
+This extension provides [[yii2tech\ar\eagerjoin\EagerJoinTrait]] trait, which, once used in the
 ActiveRecord class, allows selecting related records without extra SQL query.
 
-Configuration example:
+Setup example:
 
 ```php
 use yii\db\ActiveRecord;
-use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinTrait;
 
 class Item extends ActiveRecord
 {
-    public function behaviors()
-    {
-        return [
-            'eagerJoin' => [
-                'class' => EagerJoinBehavior::className(),
-                'boundary' => '__',
-            ],
-        ];
-    }
+    use EagerJoinTrait;
 
     public function getGroup()
     {
@@ -109,7 +101,7 @@ where:
 
  - 'relationName' - name of the relation to be populated
  - 'columnName' - name of the column(attribute) of the related record to be filled
- - 'boundary' - separator configured by [[yii2tech\ar\eagerjoin\EagerJoinBehavior::boundary]]
+ - 'boundary' - separator configured by [[yii2tech\ar\eagerjoin\EagerJoinTrait::eagerJoinBoundary()]]
 
 For example:
 
@@ -139,37 +131,29 @@ method, otherwise you'll gain no benefit.
 > Tip: if you use 'camelCase' notation for your table columns, you may use single underscore ('_') as a
   boundary in order to make select statements more clear.
 
-You may speed up composition of the query for the eager join using [[\yii2tech\ar\eagerjoin\EagerJoinQueryBehavior]] behavior.
-This behavior should be attached to the [[\yii\db\ActiveQuery]] instance:
+You may speed up composition of the query for the eager join using [[\yii2tech\ar\eagerjoin\EagerJoinQueryTrait]] trait.
+This trait should be used in the [[\yii\db\ActiveQuery]] instance:
 
 ```php
 use yii\db\ActiveQuery;
-use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinQueryTrait;
 use yii\db\ActiveRecord;
-use yii2tech\ar\eagerjoin\EagerJoinBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinTrait;
 
 class ItemQuery extends ActiveQuery
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            'eagerJoin' => [
-                'class' => EagerJoinQueryBehavior::className(),
-            ],
-        ];
-    }
+    use EagerJoinQueryTrait;
 
     // ...
 }
 
 class Item extends ActiveRecord
 {
+    use EagerJoinTrait;
+
     /**
      * @inheritdoc
-     * @return ItemQuery|EagerJoinQueryBehavior the active query used by this AR class.
+     * @return ItemQuery the active query used by this AR class.
      */
     public static function find()
     {
@@ -189,10 +173,17 @@ $items = Item::find()->eagerJoinWith('group')->all();
 Composition of the proper 'select' and 'join' statements will be performed automatically.
 
 
-## Restrictions and drawbacks <span id="internationalization"></span>
+## Restrictions and drawbacks <span id="restrictions-and-drawbacks"></span>
 
 While reducing the number of executed queries, this extension has several restrictions and drawbacks.
 
 1) Only 'has-one' relations are supported. Extension is unable to handle 'has-many' relations.
+You should use regular `joinWith()` and eager loading for 'has-many' relations.
 
-2) If all selected related model fields will be `null` the whole related record will be set to `null`.
+2) If all selected related model fields will be `null`, the whole related record will be set to `null`.
+You should always select at least one 'not null' column to avoid inappropriate results.
+
+3) Despite extra query removal, this extension may not actually increase overall performance.
+Regular Yii eager join query is very simple and fast, while this extension consumes extra memory and performs
+extra calculations. Thus in result performance remain almost the same. In most cases usage of this extension is
+a tradeoff: it reduces load on Database side, while increases it on PHP side.

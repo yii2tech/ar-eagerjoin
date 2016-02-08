@@ -17,10 +17,16 @@ use yii\db\ActiveQuery;
  * Setup example:
  *
  * ```php
- * use yii\db\ActiveRecord;
- * use yii2tech\ar\eagerjoin\EagerJoinTrait;
  * use yii\db\ActiveQuery;
  * use yii2tech\ar\eagerjoin\EagerJoinQueryTrait;
+ * use yii\db\ActiveRecord;
+ * use yii2tech\ar\eagerjoin\EagerJoinTrait;
+ *
+ * class ItemQuery extends ActiveQuery
+ * {
+ *     use EagerJoinQueryTrait;
+ *     // ...
+ * }
  *
  * class Item extends ActiveRecord
  * {
@@ -31,12 +37,6 @@ use yii\db\ActiveQuery;
  *         return new ItemQuery(get_called_class());
  *     }
  *
- *     // ...
- * }
- *
- * class ItemQuery extends ActiveQuery
- * {
- *     use EagerJoinQueryTrait;
  *     // ...
  * }
  * ```

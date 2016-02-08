@@ -3,7 +3,6 @@
 namespace yii2tech\tests\unit\ar\eagerjoin\data;
 
 use yii\db\ActiveRecord;
-use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
 use yii2tech\ar\eagerjoin\EagerJoinTrait;
 
 /**
@@ -38,7 +37,7 @@ class Item extends ActiveRecord
 
     /**
      * @inheritdoc
-     * @return ItemQuery|EagerJoinQueryBehavior the active query used by this AR class.
+     * @return ItemQuery the active query used by this AR class.
      */
     public static function find()
     {
