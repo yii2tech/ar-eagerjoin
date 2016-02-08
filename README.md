@@ -107,7 +107,7 @@ For example:
 
 ```php
 $items = Item::find()
-    ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+    ->select(['Item.*', 'group__name' => 'Group.name', 'group__code' => 'Group.code'])
     ->joinWith('group', false) // disable regular eager loading!!!
     ->all();
 

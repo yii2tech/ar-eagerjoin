@@ -11,7 +11,7 @@ class EagerJoinTraitTest extends TestCase
     public function testEagerJoin()
     {
         $item = Item::find()
-            ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+            ->select(['Item.*', 'group__name' => 'Group.name', 'group__code' => 'Group.code'])
             ->joinWith('group', false)
             ->andWhere(['groupId' => 2])
             ->limit(1)
@@ -28,8 +28,8 @@ class EagerJoinTraitTest extends TestCase
     public function testSkipEagerJoin()
     {
         $item = Item::find()
-            ->select(['{{item}}.*', new Expression('1 AS foo')])
-            ->andWhere(['{{item}}.[[id]]' => 2])
+            ->select(['Item.*', new Expression('1 AS foo')])
+            ->andWhere(['{{Item}}.[[id]]' => 2])
             ->limit(1)
             ->one();
 
@@ -42,7 +42,7 @@ class EagerJoinTraitTest extends TestCase
     public function testRelatedIsNull()
     {
         $item = Item::find()
-            ->select(['{{item}}.*', '{{group}}.[[name]] AS group__name', '{{group}}.[[code]] AS group__code'])
+            ->select(['Item.*', 'group__name' => 'Group.name', 'group__code' => 'Group.code'])
             ->joinWith('group', false)
             ->andWhere(['groupId' => null])
             ->limit(1)
