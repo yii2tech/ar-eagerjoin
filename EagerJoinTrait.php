@@ -55,6 +55,22 @@ use yii\db\BaseActiveRecord;
 trait EagerJoinTrait
 {
     /**
+     * Returns boundary, which should be used to separate relation name from attribute name in selected column name.
+     * Each field, mentioned in query 'select' statement, for the eager joined entity should be composed in format:
+     * `relationName + boundary + attributeName`.
+     * For example: 'group__name' will refer to the 'name' attribute of the relation 'group'.
+     *
+     * You may redeclare this method inside particular ActiveRecord class in order to specify your own boundary.
+     *
+     * @return string eager join column boundary.
+     */
+    public static function eagerJoinBoundary()
+    {
+        return '__';
+    }
+
+
+    /**
      * Populates an active record object using a row of data from the database/storage.
      * Populates related records if corresponding keys are present in the data set ($row).
      * @see BaseActiveRecord::populateRecord()
@@ -65,7 +81,7 @@ trait EagerJoinTrait
      */
     public static function populateRecord($record, $row)
     {
-        $boundary = '__';
+        $boundary = static::eagerJoinBoundary();
         $relatedAttributes = [];
         foreach ($row as $name => $value) {
             if (strpos($name, $boundary) === false) {

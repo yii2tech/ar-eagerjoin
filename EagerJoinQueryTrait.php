@@ -68,9 +68,9 @@ trait EagerJoinQueryTrait
             $this->select(['{{' . $mainTableName . '}}.*']);
         }
 
-        /* @var $mainModel \yii\db\ActiveRecord */
+        /* @var $mainModel \yii\db\ActiveRecord|EagerJoinTrait */
         $mainModel = new $this->modelClass();
-        $boundary = '__';
+        $boundary = $mainModel->eagerJoinBoundary();
 
         foreach ((array)$with as $relation) {
             $relationQuery = $mainModel->getRelation($relation);
