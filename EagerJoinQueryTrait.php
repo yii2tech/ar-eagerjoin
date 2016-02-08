@@ -65,7 +65,7 @@ trait EagerJoinQueryTrait
         /* @var $this ActiveQuery|static */
         if ($this->select === null) {
             $mainTableName = call_user_func([$this->modelClass, 'tableName']);
-            $this->select(['{{' . $mainTableName . '}}.*']);
+            $this->select([$mainTableName . '.*']);
         }
 
         /* @var $mainModel \yii\db\ActiveRecord|EagerJoinTrait */
@@ -81,7 +81,7 @@ trait EagerJoinQueryTrait
             $relatedAttributes = $relationTableSchema->getColumnNames();
             $selectColumns = [];
             foreach ($relatedAttributes as $attribute) {
-                $selectColumns[] = '{{' . $relationTableName . '}}.[[' . $attribute . ']] AS ' . $relation . $boundary . $attribute;
+                $selectColumns[$relation . $boundary . $attribute] = $relationTableName . '.' . $attribute;
             }
             $this->addSelect($selectColumns);
         }
