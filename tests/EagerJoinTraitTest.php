@@ -6,7 +6,7 @@ use yii\db\Expression;
 use yii2tech\tests\unit\ar\eagerjoin\data\Group;
 use yii2tech\tests\unit\ar\eagerjoin\data\Item;
 
-class EagerJoinBehaviorTest extends TestCase
+class EagerJoinTraitTest extends TestCase
 {
     public function testEagerJoin()
     {
@@ -34,23 +34,6 @@ class EagerJoinBehaviorTest extends TestCase
             ->one();
 
         $this->assertFalse($item->isRelationPopulated('group'));
-    }
-
-    /**
-     * @depends testEagerJoin
-     */
-    public function testAttributeMap()
-    {
-        $item = Item::find()
-            ->select(['{{item}}.*', '{{group}}.[[name]] AS groupName'])
-            ->joinWith('group', false)
-            ->andWhere(['groupId' => 2])
-            ->limit(1)
-            ->one();
-
-        $this->assertTrue($item->isRelationPopulated('group'));
-        $this->assertTrue($item->group instanceof Group);
-        $this->assertEquals('group2', $item->group->name);
     }
 
     /**

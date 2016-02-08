@@ -3,21 +3,11 @@
 namespace yii2tech\tests\unit\ar\eagerjoin\data;
 
 use yii\db\ActiveQuery;
-use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinQueryTrait;
 
 class ItemQuery extends ActiveQuery
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            'eagerJoin' => [
-                'class' => EagerJoinQueryBehavior::className(),
-            ],
-        ];
-    }
+    use EagerJoinQueryTrait;
 
     /**
      * @inheritdoc

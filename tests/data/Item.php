@@ -3,8 +3,8 @@
 namespace yii2tech\tests\unit\ar\eagerjoin\data;
 
 use yii\db\ActiveRecord;
-use yii2tech\ar\eagerjoin\EagerJoinBehavior;
 use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
+use yii2tech\ar\eagerjoin\EagerJoinTrait;
 
 /**
  * @property integer $id
@@ -16,20 +16,7 @@ use yii2tech\ar\eagerjoin\EagerJoinQueryBehavior;
  */
 class Item extends ActiveRecord
 {
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            'eagerJoin' => [
-                'class' => EagerJoinBehavior::className(),
-                'attributeMap' => [
-                    'groupName' => ['group', 'name'],
-                ],
-            ],
-        ];
-    }
+    use EagerJoinTrait;
 
     /**
      * @inheritdoc

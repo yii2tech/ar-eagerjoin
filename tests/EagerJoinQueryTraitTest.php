@@ -4,7 +4,7 @@ namespace yii2tech\tests\unit\ar\eagerjoin;
 
 use yii2tech\tests\unit\ar\eagerjoin\data\Item;
 
-class EagerJoinQueryBehaviorTest extends TestCase
+class EagerJoinQueryTraitTest extends TestCase
 {
     public function testEagerJoinWith()
     {
