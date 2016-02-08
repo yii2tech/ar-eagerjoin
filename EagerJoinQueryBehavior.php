@@ -68,11 +68,17 @@ class EagerJoinQueryBehavior extends RelatedAttributesBehavior
             $this->owner->select(['{{' . $mainTableName . '}}.*']);
         }
 
+        /* @var $mainModel \yii\db\ActiveRecord */
+        $mainModel = new $this->owner->modelClass();
+
         foreach ((array)$with as $relation) {
-            $relatedAttributes = $this->getRelatedAttributes($this->owner->modelClass, $relation);
+            $relationQuery = $mainModel->getRelation($relation);
+            $relationTableName = call_user_func([$relationQuery->modelClass, 'tableName']);
+
+            $relatedAttributes = $this->getRelatedAttributes($mainModel, $relation);
             $selectColumns = [];
             foreach ($relatedAttributes as $attribute) {
-                $selectColumns[] = '{{' . $relation . '}}.[[' . $attribute . ']] AS ' . $relation . $this->boundary . $attribute;
+                $selectColumns[] = '{{' . $relationTableName . '}}.[[' . $attribute . ']] AS ' . $relation . $this->boundary . $attribute;
             }
             $this->owner->addSelect($selectColumns);
         }

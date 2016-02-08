@@ -26,34 +26,28 @@ class RelatedAttributesBehavior extends Behavior
 
 
     /**
-     * Get the list of related model attributes for the given ActiveRecord instance or class.
-     * @param string $modelOrClass model instance or class name.
+     * Get the list of related model attributes for the given ActiveRecord instance.
+     * @param ActiveRecord $model model instance.
      * @param string $relationName name of the relation to be searched.
      * @return array related model attribute names.
      */
-    public function getRelatedAttributes($modelOrClass, $relationName)
+    public function getRelatedAttributes($model, $relationName)
     {
-        $className = is_object($modelOrClass) ? get_class($modelOrClass) : $modelOrClass;
+        $className = get_class($model);
         if (!isset(self::$relatedAttributes[$className][$relationName])) {
-            self::$relatedAttributes[$className][$relationName] = $this->findRelatedAttributes($modelOrClass, $relationName);
+            self::$relatedAttributes[$className][$relationName] = $this->findRelatedAttributes($model, $relationName);
         }
         return self::$relatedAttributes[$className][$relationName];
     }
 
     /**
-     * @param string $modelOrClass model instance or class name.
+     * Finds the list of related model attributes for the given ActiveRecord instance.
+     * @param ActiveRecord $primaryModel model instance.
      * @param string $relationName name of the relation to be searched.
      * @return array related model attribute names.
      */
-    protected function findRelatedAttributes($modelOrClass, $relationName)
+    protected function findRelatedAttributes($primaryModel, $relationName)
     {
-        /* @var $primaryModel ActiveRecord */
-        if (is_object($modelOrClass)) {
-            $primaryModel = $modelOrClass;
-        } else {
-            $primaryModel = new $modelOrClass();
-        }
-
         $relation = $primaryModel->getRelation($relationName);
         $modelClass = $relation->modelClass;
 
