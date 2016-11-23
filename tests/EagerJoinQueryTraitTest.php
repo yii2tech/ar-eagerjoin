@@ -22,4 +22,19 @@ class EagerJoinQueryTraitTest extends TestCase
         $this->assertEquals('group1', $item->group->name);
         $this->assertEquals('g1', $item->group->code);
     }
+
+    /**
+     * @depends testEagerJoinWith
+     */
+    public function testEagerJoinWithCallback()
+    {
+        $rows = Item::find()
+            ->eagerJoinWith(['group' => function ($query) {
+                /* @var $query \yii\db\ActiveQuery */
+                $query->andOnCondition(['{{Group}}.[[id]]' => 1]);
+            }], 'INNER JOIN')
+            ->all();
+
+        $this->assertCount(2, $rows);
+    }
 }

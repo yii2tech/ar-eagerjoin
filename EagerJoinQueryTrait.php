@@ -72,7 +72,11 @@ trait EagerJoinQueryTrait
         $mainModel = new $this->modelClass();
         $boundary = $mainModel->eagerJoinBoundary();
 
-        foreach ((array)$with as $relation) {
+        foreach ((array)$with as $relation => $callback) {
+            if (is_int($relation)) {
+                $relation = $callback;
+            }
+
             $relationQuery = $mainModel->getRelation($relation);
             $relationTableName = call_user_func([$relationQuery->modelClass, 'tableName']);
             /* @var $relationTableSchema \yii\db\TableSchema */
