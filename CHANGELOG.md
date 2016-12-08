@@ -1,7 +1,7 @@
 Yii 2 ActiveRecord Eager Join extension Change Log
 ==================================================
 
-1.0.1 under development
+1.0.1, December 8, 2016
 -----------------------
 
 - Bug #1: Fixed `EagerJoinQueryTrait::eagerJoinWith()` unable to process relation query callback (nanodesu88)
