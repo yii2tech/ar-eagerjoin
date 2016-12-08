@@ -1,7 +1,7 @@
 {
     "name": "yii2tech/ar-eagerjoin",
     "description": "Provides support for ActiveRecord relation eager loading via join without extra query in Yii2",
-    "keywords": ["yii2", "active", "record", "relation", "eager", "join"],
+    "keywords": ["yii2", "active", "record", "relation", "eager", "join", "together"],
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "support": {

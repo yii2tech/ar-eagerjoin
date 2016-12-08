@@ -6,8 +6,8 @@ use yii\db\ActiveRecord;
 use yii2tech\ar\eagerjoin\EagerJoinTrait;
 
 /**
- * @property integer $id
- * @property integer $groupId
+ * @property int $id
+ * @property int $groupId
  * @property string $name
  * @property float $price
  *
