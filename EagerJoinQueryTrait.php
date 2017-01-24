@@ -64,7 +64,12 @@ trait EagerJoinQueryTrait
     {
         /* @var $this ActiveQuery|static */
         if ($this->select === null) {
-            $mainTableName = call_user_func([$this->modelClass, 'tableName']);
+            if (!empty($this->from) && is_string($key = key($this->from))) {
+                $mainTableName = $key;
+            } else {
+                $mainTableName = call_user_func([$this->modelClass, 'tableName']);
+            }
+
             $this->select([$mainTableName . '.*']);
         }
 
@@ -77,13 +82,19 @@ trait EagerJoinQueryTrait
                 $relation = $callback;
             }
 
+            if (preg_match('/^(.*?)(?:\s+AS\s+|\s+)(\w+)$/i', $relation, $matches)) {
+                // relation is defined with an alias
+                list(, $relation, $alias) = $matches;
+            }
+
             $relationQuery = $mainModel->getRelation($relation);
-            $relationTableName = call_user_func([$relationQuery->modelClass, 'tableName']);
+            $relationTableName = isset($alias) ? $alias : call_user_func([$relationQuery->modelClass, 'tableName']);
             /* @var $relationTableSchema \yii\db\TableSchema */
             $relationTableSchema = call_user_func([$relationQuery->modelClass, 'getTableSchema']);
 
             $relatedAttributes = $relationTableSchema->getColumnNames();
             $selectColumns = [];
+
             foreach ($relatedAttributes as $attribute) {
                 $selectColumns[$relation . $boundary . $attribute] = $relationTableName . '.' . $attribute;
             }

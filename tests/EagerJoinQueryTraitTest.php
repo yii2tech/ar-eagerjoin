@@ -2,6 +2,7 @@
 
 namespace yii2tech\tests\unit\ar\eagerjoin;
 
+use yii2tech\tests\unit\ar\eagerjoin\data\Group;
 use yii2tech\tests\unit\ar\eagerjoin\data\Item;
 
 class EagerJoinQueryTraitTest extends TestCase
@@ -36,5 +37,31 @@ class EagerJoinQueryTraitTest extends TestCase
             ->all();
 
         $this->assertCount(2, $rows);
+    }
+
+    /**
+     * @depends testEagerJoinWith
+     */
+    public function testAlias()
+    {
+        // SELECT Item.*, group_alias.id AS group__id, ...
+        $query = Item::find()->eagerJoinWith('group AS group_alias', 'INNER JOIN');
+
+        $this->assertArrayHasKey('group' . Item::eagerJoinBoundary() . 'id', $query->select);
+        $this->assertEquals('group_alias.id', $query->select['group' . Item::eagerJoinBoundary() . 'id']);
+
+        $item = $query->one();
+        $this->assertTrue($item->isRelationPopulated('group'));
+        $this->assertEquals($item->groupId, $item->group->id);
+
+        // SELECT Item.*, Group.id AS group__id, ...
+        $query = Item::find()->eagerJoinWith('group', 'INNER JOIN');
+
+        $this->assertArrayHasKey('group' . Item::eagerJoinBoundary() . 'id', $query->select);
+        $this->assertEquals(Group::tableName() . '.id', $query->select['group' . Item::eagerJoinBoundary() . 'id']);
+
+        $item = $query->one();
+        $this->assertTrue($item->isRelationPopulated('group'));
+        $this->assertEquals($item->groupId, $item->group->id);
     }
 }
