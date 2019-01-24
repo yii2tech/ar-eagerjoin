@@ -1,7 +1,7 @@
 Yii 2 ActiveRecord Eager Join extension Change Log
 ==================================================
 
-1.0.2 under development
+1.0.2, January 24, 2019
 -----------------------
 
 - Enh #3: Added alias specification support for `EagerJoinQueryTrait::eagerJoinWith()` (nanodesu88)
