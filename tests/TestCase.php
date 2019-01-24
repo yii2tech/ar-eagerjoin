@@ -2,8 +2,8 @@
 
 namespace yii2tech\tests\unit\ar\eagerjoin;
 
-use yii\helpers\ArrayHelper;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Base class for the test cases.

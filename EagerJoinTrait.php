@@ -69,7 +69,6 @@ trait EagerJoinTrait
         return '__';
     }
 
-
     /**
      * Populates an active record object using a row of data from the database/storage.
      * Populates related records if corresponding keys are present in the data set ($row).

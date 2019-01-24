@@ -56,7 +56,7 @@ trait EagerJoinQueryTrait
 {
     /**
      * Performs eager joins with the specified relations.
-     * @param @param string|array $with the relations to be joined.
+     * @param string|array $with the relations to be joined.
      * @param string|array $joinType the join type of the relations specified in `$with`.
      * @return ActiveQuery|static query self reference.
      */
@@ -100,12 +100,13 @@ trait EagerJoinQueryTrait
             }
             $this->addSelect($selectColumns);
         }
+
         return $this->joinWith($with, false, $joinType);
     }
 
     /**
      * Performs eager left joins with the specified relations.
-     * @param @param string|array $with the relations to be joined.
+     * @param string|array $with the relations to be joined.
      * @return ActiveQuery|static query self reference.
      */
     public function eagerLeftJoinWith($with)
@@ -115,7 +116,7 @@ trait EagerJoinQueryTrait
 
     /**
      * Performs eager inner joins with the specified relations.
-     * @param @param string|array $with the relations to be joined.
+     * @param string|array $with the relations to be joined.
      * @return ActiveQuery|static query self reference.
      */
     public function eagerInnerJoinWith($with)
